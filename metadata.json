@@ -1,0 +1,5 @@
+{
+  "name": "El Buen Editor",
+  "description": "An application for book editors to upload manuscripts (PDF or DOCX) and receive a comprehensive editorial analysis powered by the Gemini API. It generates a technical sheet including title, subtitle suggestions, author bio, commercial synopsis, subject classifications (IBIC, THEMA, BISAC), relevant tags, academic citations, and a word count. All text extraction is performed client-side to ensure privacy.",
+  "requestFramePermissions": []
+}
