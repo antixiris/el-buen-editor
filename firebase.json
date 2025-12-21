@@ -1,5 +1,8 @@
 {
-"hosting": {
+  "firestore": {
+    "rules": "firestore.rules"
+  },
+  "hosting": {
   "public": "dist", // ¡Aquí está el cambio clave!
   "ignore": [
     "firebase.json",
