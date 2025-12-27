@@ -1,14 +1,15 @@
 import React, { FC, useState } from 'react';
 import { getTranslation } from '@/services/geminiService';
 import { renderWithItalics } from '@/services/utils';
-import { AnalysisResult, TranslatedResult, SubjectClassification } from '@/types';
+import { AnalysisResult, TranslatedResult, SubjectClassification, CommercialData } from '@/types';
 import { ActionBar } from './ActionBar';
 
 interface ResultsDisplayProps {
     result: AnalysisResult;
+    commercialData?: CommercialData;
 }
 
-export const ResultsDisplay: FC<ResultsDisplayProps> = ({ result }) => {
+export const ResultsDisplay: FC<ResultsDisplayProps> = ({ result, commercialData }) => {
     const [translatedResult, setTranslatedResult] = useState<TranslatedResult | null>(null);
     const [isTranslating, setIsTranslating] = useState(false);
 
@@ -76,6 +77,7 @@ export const ResultsDisplay: FC<ResultsDisplayProps> = ({ result }) => {
                     translatedResult={translatedResult}
                     isTranslating={isTranslating}
                     onTranslate={handleTranslateClick}
+                    commercialData={commercialData}
                 />
             </div>
 

@@ -50,13 +50,18 @@ el-buen-editor/
 
 ## Archivos Clave y Líneas Importantes
 
-### `functions/src/index.ts` - Backend
-- **Líneas 1-50**: Imports y configuración de Gemini API
-- **Líneas 100-300**: `getAnalysis` - Análisis principal del manuscrito
-- **Líneas 400-500**: `getArticleReview` - Generación de reseñas
-- **Líneas 550-650**: `getInterview` - Generación de entrevistas
-- **Líneas 736-844**: `getPressRelease` - Comunicado de prensa (con extracción de editorial)
-- **Líneas 900-1000**: `getSocialMediaPosts` - Posts para RRSS
+### `functions/src/index.ts` - Backend (actualizado 27 Dic 2024)
+- **Líneas 19-58**: `NORMAS_ORTOTIPOGRAFICAS` - Constante con reglas ortotipográficas
+- **Líneas 138-195**: `formatCommercialData()` - Helper para formatear datos comerciales
+- **Líneas 476-750**: `getEditorialAnalysis` - Análisis principal del manuscrito
+- **Líneas 870-1000**: `getArticleReview` - Generación de reseñas para Ghost
+- **Líneas 1000-1200**: `getPressRelease` - Comunicado de prensa
+- **Líneas 1209-1340**: `getInterview` - Generación de entrevistas (sin numerar preguntas)
+- **Líneas 1370-1500**: `getBackCoverText` - Texto de solapa
+- **Líneas 1503-1710**: `getSocialMediaPosts` - Posts para RRSS
+- **Líneas 1712-1900**: `getSalesPitch` - Argumentario de ventas
+- **Líneas 1900-2100**: `getBookstoreEmail` - Email a libreros
+- **Líneas 2150-2360**: `getReadingReport` - Informe de lectura
 
 ### `components/HeaderContentBar.tsx` - Menú de Generadores
 - **Líneas 25-63**: `menuCategories` - Definición de categorías (Editorial, Comunicación, RRSS)
@@ -81,6 +86,62 @@ Solo estos emails pueden acceder a la aplicación:
 - `lanochedelfugitivo@gmail.com`
 
 La verificación se hace tanto en frontend (AuthContext) como en backend (firestore.rules).
+
+---
+
+## Cambios Realizados - 27 de Diciembre 2024
+
+### 1. Normas Ortotipográficas para Contenido Editorial
+**Archivo**: `functions/src/index.ts` (líneas 19-58)
+
+Creada constante `NORMAS_ORTOTIPOGRAFICAS` con reglas obligatorias del español:
+- **Cursiva**: Títulos de libros, películas, obras de arte, periódicos, extranjerismos, latinismos, nombres científicos
+- **Comillas españolas («»)**: Citas textuales, títulos de capítulos/poemas/artículos
+- **Verificación**: Checklist de 4 puntos antes de entregar respuesta
+
+Añadida a TODAS las funciones de generación de contenido:
+- `getEditorialAnalysis` (línea 684)
+- `getArticleReview` (línea 969)
+- `getPressRelease` (línea 1180)
+- `getInterview` (línea 1319)
+- `getBackCoverText` (línea 1500)
+- `getSocialMediaPosts` (línea 1700)
+- `getSalesPitch` (línea 1880)
+- `getBookstoreEmail` (línea 2090)
+- `getReadingReport` (línea 2340)
+
+### 2. Datos Comerciales Completos en Todas las Funciones
+**Archivo**: `functions/src/index.ts`
+
+Corregida inconsistencia donde cada función implementaba su propio subconjunto de datos comerciales. Ahora TODAS incluyen:
+
+| Campo | getPressRelease | getBookstoreEmail | getSalesPitch | getSocialMediaPosts |
+|-------|-----------------|-------------------|---------------|---------------------|
+| coverImageUrl | ✅ | ✅ (añadido) | ✅ (añadido) | ✅ (añadido) |
+| authorPhotoUrl | ✅ | ✅ (añadido) | ✅ (añadido) | ✅ (añadido) |
+| publisher | ✅ | ✅ | ✅ (añadido) | ✅ (añadido) |
+| isbn | ✅ | ✅ | ✅ | ✅ |
+| pages | ✅ | ✅ | ✅ | ✅ |
+| price | ✅ | ✅ | ✅ | ✅ |
+| format | ✅ (añadido) | ✅ | ✅ | ✅ |
+| collection | ✅ (añadido) | ✅ | ✅ | ✅ (añadido) |
+| translator | ✅ | ✅ (añadido) | ✅ (añadido) | ✅ (añadido) |
+| originalTitle | ✅ | ✅ (añadido) | ✅ (añadido) | ✅ (añadido) |
+
+Líneas modificadas:
+- `getPressRelease`: 1045-1056 (añadidos format, collection)
+- `getBookstoreEmail`: 1950-1969 (añadidos translator, originalTitle, authorPhotoUrl)
+- `getSalesPitch`: 1744-1793 (añadidos publisher, translator, originalTitle, imágenes)
+- `getSocialMediaPosts`: 1522-1556 (añadidos publisher, collection, translator, originalTitle, imágenes)
+
+### 3. Corrección de Numeración Duplicada en Entrevistas
+**Archivo**: `functions/src/index.ts` (línea 1313)
+
+**Problema**: Las preguntas aparecían como "Pregunta 1: 1. ¿...?"
+- Backend pedía "Numera las preguntas del 1 al 10" → Gemini incluía "1.", "2."...
+- Frontend añadía "Pregunta N:" al mostrar cada elemento del array
+
+**Solución**: Cambiar instrucción a "NO numeres las preguntas (la numeración se añade automáticamente)"
 
 ---
 
@@ -124,6 +185,21 @@ Características implementadas:
 
 ## Decisiones Técnicas
 
+### Normas Ortotipográficas Centralizadas (27 Dic 2024)
+- **Decisión**: Crear constante `NORMAS_ORTOTIPOGRAFICAS` e inyectarla en todos los prompts
+- **Razón**: Evita duplicación de código y garantiza consistencia. Si se añade una regla nueva (ej: versalitas para siglos), se actualiza en un solo lugar
+- **Alternativa descartada**: Copiar las normas manualmente en cada prompt
+
+### Datos Comerciales por Función vs Helper Centralizado (27 Dic 2024)
+- **Decisión**: Mantener implementación específica por función en lugar de usar `formatCommercialData()` en todas
+- **Razón**: Algunas funciones necesitan formateo especializado (ej: "Imágenes para prensa" vs "Material gráfico disponible", sección de traducción con nota especial)
+- **Trade-off**: Más código, pero mejor control sobre el contexto de cada función
+
+### Separación de Responsabilidades: Backend vs Frontend (27 Dic 2024)
+- **Decisión**: El backend devuelve datos estructurados (arrays), el frontend decide la presentación (numeración, formato)
+- **Razón**: Evita duplicaciones como "Pregunta 1: 1." donde ambos numeraban
+- **Aplicado en**: `getInterview` (preguntas sin numerar) + `copyInterviewToClipboard` (añade "Pregunta N:")
+
 ### Autenticación con Whitelist
 - **Decisión**: Verificar emails tanto en frontend como backend
 - **Razón**: Seguridad en capas. El frontend da UX inmediata, pero las reglas de Firestore son la verdadera protección
@@ -143,6 +219,13 @@ Características implementadas:
 ---
 
 ## Próximos Pasos Sugeridos
+
+### Prioritario (detectado en sesión del 27 Dic)
+1. [ ] **Persistencia de datos comerciales**: Actualmente solo existen en estado React (se pierden al refrescar). Opciones:
+   - localStorage para persistencia local
+   - Firestore vinculado al análisis del libro para persistencia permanente
+2. [ ] **Refactorizar helper `formatCommercialData()`**: Consolidar la lógica de formateo que ahora está duplicada en cada función
+3. [ ] **Añadir más normas ortotipográficas**: Versalitas para siglos (s. XIX), números romanos, abreviaturas
 
 ### Mejoras de UX
 1. [ ] Añadir indicador de éxito tras copiar al portapapeles (toast notification)

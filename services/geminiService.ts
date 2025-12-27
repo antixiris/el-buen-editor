@@ -1,4 +1,4 @@
-import { AnalysisResult, CitationInfo, TranslatedResult } from '../types';
+import { AnalysisResult, CitationInfo, TranslatedResult, CommercialData } from '../types';
 
 // --- IMPORTANTE ---
 // Después de ejecutar 'firebase deploy', la consola te dará las URLs de tus funciones.
@@ -15,6 +15,8 @@ const GET_BOOKSTORE_EMAIL_URL = "https://us-central1-el-buen-editor.cloudfunctio
 const GET_READING_REPORT_URL = "https://us-central1-el-buen-editor.cloudfunctions.net/getReadingReport";
 const GET_COMPARABLES_URL = "https://us-central1-el-buen-editor.cloudfunctions.net/getComparables";
 const GET_SEO_KEYWORDS_URL = "https://us-central1-el-buen-editor.cloudfunctions.net/getSeoKeywords";
+const PUBLISH_TO_GHOST_URL = "https://us-central1-el-buen-editor.cloudfunctions.net/publishToGhost";
+const CHAT_WITH_AGENT_URL = "https://us-central1-el-buen-editor.cloudfunctions.net/chatWithAgent";
 
 
 export const getAnalysis = async (text: string, wordCount: number): Promise<AnalysisResult> => {
@@ -89,7 +91,7 @@ export const getUpdatedCitations = async (title: string, authorName: string, inf
     return Promise.resolve(generateCitations(title, authorName, info));
 }
 
-export const getArticle = async (data: AnalysisResult): Promise<string> => {
+export const getArticle = async (data: AnalysisResult, commercialData?: CommercialData): Promise<string> => {
     if (GET_ARTICLE_URL.includes("[URL")) {
         throw new Error("La URL de la Firebase Function de artículos no ha sido configurada en services/geminiService.ts. Ejecuta 'firebase deploy' y copia la URL de getArticleReview.");
     }
@@ -98,7 +100,7 @@ export const getArticle = async (data: AnalysisResult): Promise<string> => {
         const response = await fetch(GET_ARTICLE_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ data }),
+            body: JSON.stringify({ data, commercialData }),
         });
 
         if (!response.ok) {
@@ -115,7 +117,7 @@ export const getArticle = async (data: AnalysisResult): Promise<string> => {
     }
 }
 
-export const getPressRelease = async (data: AnalysisResult): Promise<string> => {
+export const getPressRelease = async (data: AnalysisResult, commercialData?: CommercialData): Promise<string> => {
     if (GET_PRESS_RELEASE_URL.includes("[URL")) {
         throw new Error("La URL de la Firebase Function de comunicados no ha sido configurada en services/geminiService.ts.");
     }
@@ -124,7 +126,7 @@ export const getPressRelease = async (data: AnalysisResult): Promise<string> => 
         const response = await fetch(GET_PRESS_RELEASE_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ data }),
+            body: JSON.stringify({ data, commercialData }),
         });
 
         if (!response.ok) {
@@ -146,7 +148,7 @@ export interface InterviewResult {
     questions: string[];
 }
 
-export const getInterview = async (data: AnalysisResult): Promise<InterviewResult> => {
+export const getInterview = async (data: AnalysisResult, commercialData?: CommercialData): Promise<InterviewResult> => {
     if (GET_INTERVIEW_URL.includes("[URL")) {
         throw new Error("La URL de la Firebase Function de entrevistas no ha sido configurada en services/geminiService.ts.");
     }
@@ -155,7 +157,7 @@ export const getInterview = async (data: AnalysisResult): Promise<InterviewResul
         const response = await fetch(GET_INTERVIEW_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ data }),
+            body: JSON.stringify({ data, commercialData }),
         });
 
         if (!response.ok) {
@@ -172,7 +174,7 @@ export const getInterview = async (data: AnalysisResult): Promise<InterviewResul
     }
 }
 
-export const getBackCoverText = async (data: AnalysisResult): Promise<string> => {
+export const getBackCoverText = async (data: AnalysisResult, commercialData?: CommercialData): Promise<string> => {
     if (GET_BACK_COVER_URL.includes("[URL")) {
         throw new Error("La URL de la Firebase Function de texto de solapa no ha sido configurada.");
     }
@@ -181,7 +183,7 @@ export const getBackCoverText = async (data: AnalysisResult): Promise<string> =>
         const response = await fetch(GET_BACK_COVER_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ data }),
+            body: JSON.stringify({ data, commercialData }),
         });
 
         if (!response.ok) {
@@ -205,7 +207,7 @@ export interface SocialMediaPosts {
     linkedin: string;
 }
 
-export const getSocialMediaPosts = async (data: AnalysisResult): Promise<SocialMediaPosts> => {
+export const getSocialMediaPosts = async (data: AnalysisResult, commercialData?: CommercialData): Promise<SocialMediaPosts> => {
     if (GET_SOCIAL_MEDIA_URL.includes("[URL")) {
         throw new Error("La URL de la Firebase Function de redes sociales no ha sido configurada.");
     }
@@ -214,7 +216,7 @@ export const getSocialMediaPosts = async (data: AnalysisResult): Promise<SocialM
         const response = await fetch(GET_SOCIAL_MEDIA_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ data }),
+            body: JSON.stringify({ data, commercialData }),
         });
 
         if (!response.ok) {
@@ -239,7 +241,7 @@ export interface SalesPitchResult {
     elevatorPitch: string;
 }
 
-export const getSalesPitch = async (data: AnalysisResult): Promise<SalesPitchResult> => {
+export const getSalesPitch = async (data: AnalysisResult, commercialData?: CommercialData): Promise<SalesPitchResult> => {
     if (GET_SALES_PITCH_URL.includes("[URL")) {
         throw new Error("La URL de la Firebase Function de argumentario no ha sido configurada.");
     }
@@ -248,7 +250,7 @@ export const getSalesPitch = async (data: AnalysisResult): Promise<SalesPitchRes
         const response = await fetch(GET_SALES_PITCH_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ data }),
+            body: JSON.stringify({ data, commercialData }),
         });
 
         if (!response.ok) {
@@ -270,7 +272,7 @@ export interface BookstoreEmailResult {
     body: string;
 }
 
-export const getBookstoreEmail = async (data: AnalysisResult): Promise<BookstoreEmailResult> => {
+export const getBookstoreEmail = async (data: AnalysisResult, commercialData?: CommercialData): Promise<BookstoreEmailResult> => {
     if (GET_BOOKSTORE_EMAIL_URL.includes("[URL")) {
         throw new Error("La URL de la Firebase Function de email a libreros no ha sido configurada.");
     }
@@ -279,7 +281,7 @@ export const getBookstoreEmail = async (data: AnalysisResult): Promise<Bookstore
         const response = await fetch(GET_BOOKSTORE_EMAIL_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ data }),
+            body: JSON.stringify({ data, commercialData }),
         });
 
         if (!response.ok) {
@@ -307,7 +309,7 @@ export interface ReadingReportResult {
     recommendationJustification: string;
 }
 
-export const getReadingReport = async (data: AnalysisResult): Promise<ReadingReportResult> => {
+export const getReadingReport = async (data: AnalysisResult, commercialData?: CommercialData): Promise<ReadingReportResult> => {
     if (GET_READING_REPORT_URL.includes("[URL")) {
         throw new Error("La URL de la Firebase Function de informe de lectura no ha sido configurada.");
     }
@@ -316,7 +318,7 @@ export const getReadingReport = async (data: AnalysisResult): Promise<ReadingRep
         const response = await fetch(GET_READING_REPORT_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ data }),
+            body: JSON.stringify({ data, commercialData }),
         });
 
         if (!response.ok) {
@@ -405,5 +407,96 @@ export const getSeoKeywords = async (data: AnalysisResult): Promise<SeoKeywordsR
     } catch(error) {
         console.error("Error llamando a la función de SEO:", error);
         throw new Error("La comunicación con el servicio de palabras clave SEO falló.");
+    }
+}
+
+// ============================================================================
+// GHOST BLOG INTEGRATION
+// ============================================================================
+
+export interface GhostPublishResult {
+    success: boolean;
+    postId: string;
+    postUrl: string;
+    title: string;
+    message: string;
+}
+
+export const publishToGhost = async (data: AnalysisResult): Promise<GhostPublishResult> => {
+    if (PUBLISH_TO_GHOST_URL.includes("[URL")) {
+        throw new Error("La URL de la Firebase Function de Ghost no ha sido configurada.");
+    }
+
+    try {
+        const response = await fetch(PUBLISH_TO_GHOST_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ data }),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Error desde el backend: ${response.status} ${errorText}`);
+        }
+
+        const result = await response.json();
+        return result as GhostPublishResult;
+
+    } catch(error) {
+        console.error("Error publicando en Ghost:", error);
+        throw new Error("La comunicación con el servicio de Ghost falló.");
+    }
+}
+
+// ============================================================================
+// CHAT CON AGENTE MARKETING EDITOR
+// ============================================================================
+
+export interface ChatMessage {
+    role: 'user' | 'assistant';
+    content: string;
+}
+
+export interface ChatResponse {
+    response: string;
+    tokensUsed: {
+        input: number;
+        output: number;
+    };
+}
+
+export const chatWithAgent = async (
+    bookAnalysis: AnalysisResult,
+    conversationHistory: ChatMessage[],
+    userMessage: string,
+    commercialData?: CommercialData
+): Promise<ChatResponse> => {
+    if (CHAT_WITH_AGENT_URL.includes("[URL")) {
+        throw new Error("La URL de la Firebase Function de chat no ha sido configurada.");
+    }
+
+    try {
+        const response = await fetch(CHAT_WITH_AGENT_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                bookAnalysis,
+                conversationHistory,
+                userMessage,
+                commercialData
+            }),
+        });
+
+        if (!response.ok) {
+            const errorText = await response.text();
+            throw new Error(`Error desde el backend: ${response.status} ${errorText}`);
+        }
+
+        const result = await response.json();
+        return result as ChatResponse;
+
+    } catch(error) {
+        console.error("Error en chat con agente:", error);
+        throw new Error("La comunicación con el agente de marketing falló.");
     }
 }

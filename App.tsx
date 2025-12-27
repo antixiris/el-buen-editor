@@ -2,7 +2,7 @@ import React, { useState, useCallback } from 'react';
 import { getAnalysis, getUpdatedCitations } from './services/geminiService';
 import { extractTextFromFile } from './services/utils';
 import { logBookAnalysis } from './services/activityLog';
-import { AnalysisResult, CitationInfo } from './types';
+import { AnalysisResult, CitationInfo, CommercialData } from './types';
 import { useAuth } from '@/contexts/AuthContext';
 
 import { Disclaimer } from './components/Disclaimer';
@@ -15,6 +15,8 @@ import { LoginScreen } from './components/LoginScreen';
 import { UserMenu } from './components/UserMenu';
 import { ActivityLog } from './components/ActivityLog';
 import { HeaderContentBar } from './components/HeaderContentBar';
+import { ChatPanel } from './components/ChatPanel';
+import { CommercialDataPanel } from './components/CommercialDataPanel';
 
 export default function App() {
     const { user, loading: authLoading } = useAuth();
@@ -24,6 +26,8 @@ export default function App() {
     const [error, setError] = useState<string | null>(null);
     const [isCitationModalOpen, setIsCitationModalOpen] = useState(false);
     const [isTitleModalOpen, setIsTitleModalOpen] = useState(false);
+    const [isActivityLogOpen, setIsActivityLogOpen] = useState(false);
+    const [commercialData, setCommercialData] = useState<CommercialData>({});
 
     // IMPORTANTE: Todos los hooks deben estar ANTES de cualquier return condicional
     const handleFileUpload = useCallback(async (file: File) => {
@@ -32,6 +36,7 @@ export default function App() {
         setIsLoading(true);
         setError(null);
         setAnalysisResult(null);
+        setCommercialData({}); // Limpiar datos comerciales al subir nuevo archivo
 
         try {
             setLoadingMessage('Extrayendo texto del documento...');
@@ -47,6 +52,23 @@ export default function App() {
             const result = await getAnalysis(text, wordCount);
 
             setAnalysisResult(result);
+
+            // Pre-rellenar datos comerciales si se extrajeron del manuscrito
+            if (result.extractedEditorialData) {
+                const extracted = result.extractedEditorialData;
+                setCommercialData(prev => ({
+                    ...prev,
+                    ...(extracted.isbn && { isbn: extracted.isbn }),
+                    ...(extracted.pages && { pages: extracted.pages }),
+                    ...(extracted.collection && { collection: extracted.collection }),
+                    ...(extracted.publisher && { publisher: extracted.publisher }),
+                    ...(extracted.originalTitle && { originalTitle: extracted.originalTitle }),
+                    ...(extracted.translator && { translator: extracted.translator }),
+                    ...(extracted.publicationYear && {
+                        publicationDate: `${extracted.publicationYear}-01-01`
+                    }),
+                }));
+            }
 
             // Registrar la actividad en Firestore (no bloqueante)
             logBookAnalysis(
@@ -147,9 +169,18 @@ export default function App() {
                             <p className="text-sm text-gray-600 hidden sm:block">Asistente de fichas para el gestor</p>
                         </div>
                         <div className="flex-1 flex justify-center">
-                            <HeaderContentBar result={analysisResult} />
+                            <HeaderContentBar result={analysisResult} commercialData={commercialData} />
                         </div>
-                        <div className="flex-shrink-0">
+                        <div className="flex-shrink-0 flex items-center gap-3">
+                            <button
+                                onClick={() => setIsActivityLogOpen(true)}
+                                className="flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                            >
+                                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                Historial
+                            </button>
                             <UserMenu />
                         </div>
                     </div>
@@ -164,7 +195,12 @@ export default function App() {
                                     <h2 className="text-xl font-semibold mb-4">1. Subir Manuscrito</h2>
                                     <FileUploader onFileUpload={handleFileUpload} isLoading={isLoading} disabled={isLoading} />
                                 </div>
-                                <ActivityLog />
+                                {analysisResult && (
+                                    <CommercialDataPanel
+                                        data={commercialData}
+                                        onChange={setCommercialData}
+                                    />
+                                )}
                                 <Disclaimer />
                             </div>
                             <div className="lg:col-span-2">
@@ -176,7 +212,7 @@ export default function App() {
                                         <p>{error}</p>
                                     </div>
                                 ) : analysisResult ? (
-                                    <ResultsDisplay result={analysisResult} />
+                                    <ResultsDisplay result={analysisResult} commercialData={commercialData} />
                                 ) : (
                                     <div className="p-6 bg-white rounded-lg shadow-md text-center text-gray-500">
                                         <h2 className="text-xl font-semibold mb-2">2. Esperando Análisis</h2>
@@ -190,6 +226,8 @@ export default function App() {
             </main>
             <CitationModal isOpen={isCitationModalOpen} onClose={() => setIsCitationModalOpen(false)} onSubmit={handleUpdateCitations} />
             <TitleModal isOpen={isTitleModalOpen} onClose={() => setIsTitleModalOpen(false)} onSubmit={handleUpdateTitle} />
+            <ActivityLog isOpen={isActivityLogOpen} onClose={() => setIsActivityLogOpen(false)} />
+            {analysisResult && <ChatPanel bookAnalysis={analysisResult} commercialData={commercialData} />}
         </div>
     );
 }

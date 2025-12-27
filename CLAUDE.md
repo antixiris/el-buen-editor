@@ -16,7 +16,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 **Backend (`functions/` directory):** Firebase Cloud Functions (Node 22)
 - `functions/src/index.ts` - Two HTTP endpoints: `getEditorialAnalysis` and `getTranslation`
-- Uses Google Gemini AI (`gemini-2.5-flash`) with structured JSON output schemas
+- Uses Google Gemini AI (`gemini-3-flash-preview`) with structured JSON output schemas
 - `functions/src/data/` - Static classification data (materiasIbic.ts, materiasBisac.ts, materiasThema.ts, etiquetas.ts)
 
 ## Commands
@@ -44,7 +44,7 @@ firebase deploy --only functions  # Deploy to production
 
 ## Key Implementation Details
 
-- The AI analysis prompt in `functions/src/index.ts` truncates input to 100k characters
+- The AI analysis prompt in `functions/src/index.ts` truncates input to 800k characters
 - Subject classifications must match codes from the static data files - the AI is constrained to choose from these official industry standards
 - Markdown italics (`*text*`) are used throughout for book titles in generated text
 - Citation placeholders (`[Editorial]`, `[Año]`, `[Ciudad]`) trigger a modal for user input

@@ -11,6 +11,17 @@ export interface CitationInfo {
   city?: string;
 }
 
+// Datos editoriales extraídos automáticamente del manuscrito (si están presentes)
+export interface ExtractedEditorialData {
+  isbn?: string;
+  pages?: number;
+  collection?: string;
+  publisher?: string;
+  originalTitle?: string;  // Si es traducción
+  translator?: string;     // Si es traducción
+  publicationYear?: string;
+}
+
 export interface AnalysisResult {
   title: string;
   foundSubtitle: string | null;
@@ -33,6 +44,8 @@ export interface AnalysisResult {
     vancouver: string;
   };
   rawText: string;
+  // Datos editoriales extraídos del manuscrito (galeradas, página de créditos, etc.)
+  extractedEditorialData?: ExtractedEditorialData;
 }
 
 export interface TranslatedResult {
@@ -40,4 +53,24 @@ export interface TranslatedResult {
     authorName: string;
     synopsis: string;
     authorBio: string;
+}
+
+export type BookFormat = 'hardcover' | 'paperback' | 'ebook' | 'audiobook';
+
+export interface CommercialData {
+    // Imágenes
+    coverImageUrl?: string;
+    authorPhotoUrl?: string;
+    // Datos editoriales
+    publisher?: string;
+    publicationDate?: string; // ISO date string YYYY-MM-DD
+    price?: number;
+    currency?: 'EUR' | 'USD' | 'GBP' | 'MXN';
+    isbn?: string;
+    pages?: number;
+    format?: BookFormat;
+    // Datos adicionales para marketing
+    collection?: string; // Colección editorial
+    originalTitle?: string; // Si es traducción
+    translator?: string; // Si es traducción
 }

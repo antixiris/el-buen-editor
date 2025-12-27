@@ -1,10 +1,11 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { getArticle, getPressRelease, getInterview, getBackCoverText, getSocialMediaPosts, getSalesPitch, getBookstoreEmail, getReadingReport, getComparables, getSeoKeywords } from '@/services/geminiService';
+import { getArticle, getPressRelease, getInterview, getBackCoverText, getSocialMediaPosts, getSalesPitch, getBookstoreEmail, getReadingReport, getComparables, getSeoKeywords, publishToGhost } from '@/services/geminiService';
 import { copyArticleToClipboard, copyInterviewToClipboard, copySocialMediaToClipboard, copySalesPitchToClipboard, copyBookstoreEmailToClipboard, copyReadingReportToClipboard, copyComparablesToClipboard, copySeoKeywordsToClipboard } from '@/services/utils';
-import { AnalysisResult } from '@/types';
+import { AnalysisResult, CommercialData } from '@/types';
 
 interface HeaderContentBarProps {
     result: AnalysisResult | null;
+    commercialData?: CommercialData;
 }
 
 interface ContentItem {
@@ -44,6 +45,7 @@ const menuCategories: MenuCategory[] = [
         items: [
             { id: 'press-release', label: 'Comunicado de prensa', icon: '📰' },
             { id: 'article', label: 'Reseña', icon: '📝' },
+            { id: 'ghost-blog', label: 'Publicar en Ghost', icon: '👻' },
             { id: 'interview', label: 'Entrevista', icon: '🎤' },
             { id: 'sales-pitch', label: 'Argumentario', icon: '🎯' },
             { id: 'bookstore-email', label: 'Email libreros', icon: '✉️' },
@@ -62,7 +64,7 @@ const menuCategories: MenuCategory[] = [
     },
 ];
 
-export const HeaderContentBar: React.FC<HeaderContentBarProps> = ({ result }) => {
+export const HeaderContentBar: React.FC<HeaderContentBarProps> = ({ result, commercialData }) => {
     const [loadingId, setLoadingId] = useState<string | null>(null);
     const [openMenu, setOpenMenu] = useState<string | null>(null);
     const menuRef = useRef<HTMLDivElement>(null);
@@ -87,27 +89,27 @@ export const HeaderContentBar: React.FC<HeaderContentBarProps> = ({ result }) =>
         try {
             switch (itemId) {
                 case 'article':
-                    const article = await getArticle(result);
+                    const article = await getArticle(result, commercialData);
                     copyArticleToClipboard(article, result.title, result.authorName);
                     break;
                 case 'backcover':
-                    const backCover = await getBackCoverText(result);
+                    const backCover = await getBackCoverText(result, commercialData);
                     copyArticleToClipboard(backCover, `Texto de solapa: ${result.title}`, result.authorName);
                     break;
                 case 'interview':
-                    const interview = await getInterview(result);
+                    const interview = await getInterview(result, commercialData);
                     copyInterviewToClipboard(interview.introduction, interview.questions, result.title, result.authorName);
                     break;
                 case 'reading-report':
-                    const report = await getReadingReport(result);
+                    const report = await getReadingReport(result, commercialData);
                     copyReadingReportToClipboard(report, result.title, result.authorName);
                     break;
                 case 'press-release':
-                    const pressRelease = await getPressRelease(result);
+                    const pressRelease = await getPressRelease(result, commercialData);
                     copyArticleToClipboard(pressRelease, `Comunicado: ${result.title}`, result.authorName);
                     break;
                 case 'social-media':
-                    const posts = await getSocialMediaPosts(result);
+                    const posts = await getSocialMediaPosts(result, commercialData);
                     copySocialMediaToClipboard(posts, result.title, result.authorName);
                     break;
                 case 'seo-keywords':
@@ -115,16 +117,27 @@ export const HeaderContentBar: React.FC<HeaderContentBarProps> = ({ result }) =>
                     copySeoKeywordsToClipboard(seoKeywords, result.title, result.authorName);
                     break;
                 case 'sales-pitch':
-                    const pitch = await getSalesPitch(result);
+                    const pitch = await getSalesPitch(result, commercialData);
                     copySalesPitchToClipboard(pitch, result.title, result.authorName);
                     break;
                 case 'bookstore-email':
-                    const email = await getBookstoreEmail(result);
+                    const email = await getBookstoreEmail(result, commercialData);
                     copyBookstoreEmailToClipboard(email, result.title, result.authorName);
                     break;
                 case 'comparables':
                     const comparables = await getComparables(result);
                     copyComparablesToClipboard(comparables, result.title, result.authorName);
+                    break;
+                case 'ghost-blog':
+                    const ghostResult = await publishToGhost(result);
+                    if (ghostResult.success) {
+                        const openEditor = confirm(
+                            `✅ Borrador creado en Ghost:\n\n"${ghostResult.title}"\n\n¿Quieres abrir el editor de Ghost para revisarlo?`
+                        );
+                        if (openEditor) {
+                            window.open(ghostResult.postUrl, '_blank');
+                        }
+                    }
                     break;
             }
         } catch (err) {

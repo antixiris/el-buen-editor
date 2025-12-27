@@ -1,5 +1,5 @@
 import React, { FC } from 'react';
-import { AnalysisResult, TranslatedResult } from '@/types';
+import { AnalysisResult, TranslatedResult, CommercialData } from '@/types';
 import { exportToPdf, copyToClipboard, exportToOnix } from '@/services/utils';
 
 interface ActionBarProps {
@@ -7,13 +7,15 @@ interface ActionBarProps {
     translatedResult: TranslatedResult | null;
     isTranslating: boolean;
     onTranslate: () => void;
+    commercialData?: CommercialData;
 }
 
 export const ActionBar: FC<ActionBarProps> = ({
     result,
     translatedResult,
     isTranslating,
-    onTranslate
+    onTranslate,
+    commercialData
 }) => {
     return (
         <div className="flex flex-wrap gap-2 items-center">
