@@ -48,6 +48,18 @@ Como contenido de una editorial profesional, DEBES respetar estrictamente las si
 - Significados o traducciones: la palabra *Weltanschauung* («cosmovisión»)
 - Uso irónico o enfático de una palabra
 
+## RECURSOS RETÓRICOS PROHIBIDOS
+
+**NUNCA uses estas construcciones:**
+- «no... sino...» → PROHIBIDO. Ejemplo incorrecto: «No es solo un libro, sino una guía». Ejemplo incorrecto: «no posee una guía técnica, sino una nueva mirada».
+- «no solo... sino también...» → PROHIBIDO.
+- «más que... es...» → PROHIBIDO. Ejemplo incorrecto: «Es mucho más que un libro de salud; es una invitación».
+
+**Alternativas válidas:**
+- Usa afirmaciones directas: «Este libro ofrece una guía completa y una nueva perspectiva».
+- Evita las negaciones enfáticas: en lugar de decir lo que algo «no es», di directamente lo que «es».
+- Reformula: «El lector encontrará tanto una guía técnica como una nueva mirada».
+
 ## VERIFICACIÓN ANTES DE ENTREGAR
 
 Antes de generar la respuesta, verifica que:
@@ -55,6 +67,7 @@ Antes de generar la respuesta, verifica que:
 2. ✅ TODO extranjerismo no adaptado → en cursiva
 3. ✅ TODA cita textual → entre comillas españolas («cita»)
 4. ✅ Los títulos mencionados en el texto de origen mantienen su cursiva
+5. ✅ NO aparece ninguna construcción «no... sino...» ni «más que... es...»
 `;
 const ghostAdminApiKey = defineSecret("GHOST_ADMIN_API_KEY");
 
