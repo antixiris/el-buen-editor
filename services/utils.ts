@@ -1,6 +1,8 @@
 import React from 'react';
-import { jsPDF } from 'jspdf';
 import { AnalysisResult, TranslatedResult, SubjectClassification } from '../types';
+
+// jsPDF se carga dinámicamente solo cuando se necesita exportar PDF
+type JsPDFType = import('jspdf').jsPDF;
 
 export const renderWithItalics = (text: string | null | undefined): React.ReactNode => {
     if (!text) return null;
@@ -53,7 +55,9 @@ export const extractTextFromFile = async (file: File): Promise<string> => {
   }
 };
 
-export const exportToPdf = (result: AnalysisResult, translated?: TranslatedResult) => {
+export const exportToPdf = async (result: AnalysisResult, translated?: TranslatedResult) => {
+    // Lazy load jsPDF solo cuando se necesita
+    const { jsPDF } = await import('jspdf');
     const doc = new jsPDF({ unit: 'mm', format: 'a4' });
     const margin = 20;
     const pageWidth = doc.internal.pageSize.getWidth();
