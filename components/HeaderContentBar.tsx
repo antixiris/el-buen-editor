@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { getArticle, getPressRelease, getInterview, getBackCoverText, getSocialMediaPosts, getSalesPitch, getBookstoreEmail, getReadingReport, getComparables, getSeoKeywords, publishToGhost } from '@/services/geminiService';
-import { copyArticleToClipboard, copyInterviewToClipboard, copySocialMediaToClipboard, copySalesPitchToClipboard, copyBookstoreEmailToClipboard, copyReadingReportToClipboard, copyComparablesToClipboard, copySeoKeywordsToClipboard } from '@/services/utils';
+import { copyInterviewToClipboard, copySocialMediaToClipboard, copySalesPitchToClipboard, copyBookstoreEmailToClipboard, copyReadingReportToClipboard, copyComparablesToClipboard, copySeoKeywordsToClipboard } from '@/services/utils';
 import { AnalysisResult, CommercialData } from '@/types';
+import { ContentModal } from './ContentModal';
 
 interface HeaderContentBarProps {
     result: AnalysisResult | null;
@@ -21,6 +22,12 @@ interface MenuCategory {
     color: string;
     hoverColor: string;
     items: ContentItem[];
+}
+
+interface ModalState {
+    isOpen: boolean;
+    title: string;
+    content: string;
 }
 
 const menuCategories: MenuCategory[] = [
@@ -67,6 +74,7 @@ const menuCategories: MenuCategory[] = [
 export const HeaderContentBar: React.FC<HeaderContentBarProps> = ({ result, commercialData }) => {
     const [loadingId, setLoadingId] = useState<string | null>(null);
     const [openMenu, setOpenMenu] = useState<string | null>(null);
+    const [modalState, setModalState] = useState<ModalState>({ isOpen: false, title: '', content: '' });
     const menuRef = useRef<HTMLDivElement>(null);
 
     // Cerrar menú al hacer clic fuera
@@ -90,11 +98,19 @@ export const HeaderContentBar: React.FC<HeaderContentBarProps> = ({ result, comm
             switch (itemId) {
                 case 'article':
                     const article = await getArticle(result, commercialData);
-                    copyArticleToClipboard(article, result.title, result.authorName);
+                    setModalState({
+                        isOpen: true,
+                        title: `Reseña: ${result.title}`,
+                        content: article
+                    });
                     break;
                 case 'backcover':
                     const backCover = await getBackCoverText(result, commercialData);
-                    copyArticleToClipboard(backCover, `Texto de solapa: ${result.title}`, result.authorName);
+                    setModalState({
+                        isOpen: true,
+                        title: `Texto de solapa: ${result.title}`,
+                        content: backCover
+                    });
                     break;
                 case 'interview':
                     const interview = await getInterview(result, commercialData);
@@ -106,7 +122,11 @@ export const HeaderContentBar: React.FC<HeaderContentBarProps> = ({ result, comm
                     break;
                 case 'press-release':
                     const pressRelease = await getPressRelease(result, commercialData);
-                    copyArticleToClipboard(pressRelease, `Comunicado: ${result.title}`, result.authorName);
+                    setModalState({
+                        isOpen: true,
+                        title: `Comunicado de prensa: ${result.title}`,
+                        content: pressRelease
+                    });
                     break;
                 case 'social-media':
                     const posts = await getSocialMediaPosts(result, commercialData);
@@ -205,6 +225,15 @@ export const HeaderContentBar: React.FC<HeaderContentBarProps> = ({ result, comm
                     )}
                 </div>
             ))}
+
+            {/* Modal para contenido generado */}
+            <ContentModal
+                isOpen={modalState.isOpen}
+                onClose={() => setModalState({ isOpen: false, title: '', content: '' })}
+                title={modalState.title}
+                content={modalState.content}
+                contentType="article"
+            />
         </div>
     );
 };
