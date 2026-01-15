@@ -2,15 +2,15 @@ import { initializeApp } from 'firebase/app';
 import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
-// Configuración de Firebase
+// Configuración de Firebase desde variables de entorno
 const firebaseConfig = {
-    apiKey: "AIzaSyBxX75k-a8i89hWjaNnM9wy5oaSH5nR2ok",
-    authDomain: "el-buen-editor.firebaseapp.com",
-    projectId: "el-buen-editor",
-    storageBucket: "el-buen-editor.firebasestorage.app",
-    messagingSenderId: "669316701252",
-    appId: "1:669316701252:web:84c2d88744aa7ebba37011",
-    measurementId: "G-HTRJ5GMETC"
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+    authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+    projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+    storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+    messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+    appId: import.meta.env.VITE_FIREBASE_APP_ID,
+    measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Inicializar Firebase
